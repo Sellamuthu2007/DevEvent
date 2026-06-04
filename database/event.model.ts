@@ -26,6 +26,7 @@ const slugify = (value: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");
 
+
 const normalizeDate = (value: string): string => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -86,7 +87,7 @@ const eventSchema = new Schema<EventDocument>(
 eventSchema.index({ slug: 1 }, { unique: true });
 
 // Normalize slug, date, and time before persisting changes.
-eventSchema.pre("save", function preSave(next) {
+eventSchema.pre("save", function preSave(this: EventDocument) {
   const requiredStrings = [
     this.title,
     this.description,
@@ -102,7 +103,7 @@ eventSchema.pre("save", function preSave(next) {
   ];
 
   if (requiredStrings.some((value) => value.trim().length === 0)) {
-    return next(new Error("Required fields must be non-empty"));
+    throw new Error("Required fields must be non-empty");
   }
 
   if (this.isModified("title")) {
@@ -113,7 +114,7 @@ eventSchema.pre("save", function preSave(next) {
   this.date = normalizeDate(this.date);
   this.time = normalizeTime(this.time);
 
-  return next();
+  return;
 });
 
 export const Event = mongoose.models.Event || mongoose.model<EventDocument>("Event", eventSchema);

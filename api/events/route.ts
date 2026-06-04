@@ -1,6 +1,7 @@
 import { NextRequest,NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { error } from "console";
+import { Event } from "@/database/event.model";
  
 
 export async function POST(req:NextRequest){
@@ -19,7 +20,9 @@ export async function POST(req:NextRequest){
             return NextResponse.json({"message":"Invalid JSON format"},{status : 400});  
         }
 
-        
+        const createdEvent = await Event.create(event);
+
+        return NextResponse.json({ message: "Event created successfully", event }, { status: 201 });        
 
     }
     catch(e){
